@@ -1,0 +1,6 @@
+fei_name_normalized,canonical_name,notes
+# Add top ~50 firms manually during Phase 2 entity resolution
+# Format: normalized FEI firm name, canonical labeler/sponsor name, notes (subsidiaries etc.)
+# Examples:
+# HOSPIRA,PFIZER,Hospira acquired by Pfizer 2015
+# SANDOZ,NOVARTIS,Sandoz is Novartis generics division

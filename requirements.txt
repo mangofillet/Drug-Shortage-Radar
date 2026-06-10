@@ -1,0 +1,15 @@
+pandas
+pyarrow
+requests
+lightgbm
+scikit-learn
+lifelines
+shap
+dash
+plotly
+rapidfuzz
+pytest
+tenacity
+beautifulsoup4
+lxml
+sentence-transformers
