@@ -8,7 +8,7 @@ DATA_PROCESSED = ROOT / "data" / "processed"
 REPORTS = ROOT / "reports"
 
 # Set after Phase 1a label depth verification; fallback to 2020-01 if HTML parsing fails
-STUDY_START = "2020-01"
+STUDY_START = "2018-01"
 
 # Temporal splits — adjust START only if reconstruction window differs; keep structure
 TRAIN_END = "2022-12"
@@ -21,7 +21,7 @@ LABEL_HORIZON_MONTHS = 6
 LABEL_HORIZON_SHORT_MONTHS = 3  # sensitivity analysis only
 
 # Drug universe filter
-MARKETING_CATEGORIES = {"NDA", "ANDA", "BLA"}
+MARKETING_CATEGORIES = {"NDA", "ANDA", "BLA", "NDA AUTHORIZED GENERIC"}
 
 # Entity resolution
 FUZZY_MATCH_THRESHOLD = 92  # rapidfuzz token_set_ratio cutoff

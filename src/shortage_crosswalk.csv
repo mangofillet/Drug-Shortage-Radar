@@ -1,0 +1,24 @@
+# Direct shortage-company → inspection FEI crosswalk.
+# Keys are the output of normalize_firm() — verify with normalize_firm(company_name).
+# fei_number: FDA Establishment Identifier for the actual drug manufacturer.
+shortage_company_norm,fei_number,insp_firm_name
+# Accord Healthcare (US) = subsidiary of Intas Pharmaceuticals, India
+ACCORD,3004011473,Intas Pharmaceuticals Limited
+# Bristol-Myers Squibb — not in NDC labelers; main US mfg site
+BRISTOL MYERS SQUIBB,2211101,Bristol-Myers Squibb Company
+# Teligent Pharma — not in NDC; Drug Quality Assurance inspections under this name
+TELIGENT,1000526875,Teligent Pharma, Inc.
+# Impax Laboratories — not in NDC (acquired by Amneal 2018); legacy facility
+IMPAX,3004182921,Impax Laboratories, LLC.
+# Prinston Pharmaceutical (US) = subsidiary of Zhejiang Huayi, China
+PRINSTON,3003657871,Zhejiang Huayi Pharmaceutical Co., Ltd.
+# Pfizer variants that normalize to bare "PFIZER"
+PFIZER,2416101,Pfizer Inc.
+# Novartis bare token
+NOVARTIS,2210396,Novartis Pharmaceuticals Corporation
+# Chartwell Molecular Holdings = parent of Chartwell Pharmaceuticals mfg sites
+CHARTWELL MOLECULAR,2433247,Chartwell Pharmaceuticals Amityville, LLC
+# Allergan (now AbbVie) — injectable manufacturer
+ALLERGAN,1643525,Allergan Sales, LLC
+# Typo variant "Pfizer Pharmaeuticals" in shortage source data
+PFIZER PHARMAEUTICALS,2416101,Pfizer Inc.

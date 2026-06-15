@@ -6,7 +6,9 @@ scikit-learn
 lifelines
 shap
 dash
+dash-bootstrap-components
 plotly
+kaleido
 rapidfuzz
 pytest
 tenacity
