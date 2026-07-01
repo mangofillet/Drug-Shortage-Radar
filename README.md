@@ -1,6 +1,6 @@
 # Drug Shortage Early-Warning Radar
 
-![Dashboard overview](docs/dashboard.png)
+![Drug Shortage Radar — dashboard walkthrough](docs/demo.gif)
 
 **An early-warning watchlist that tells a hospital pharmacy buyer which U.S. drugs are most likely to go into shortage in the next 6 months — built entirely from free, public FDA data.**
 
