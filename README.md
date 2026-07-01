@@ -1,5 +1,7 @@
 # Drug Shortage Early-Warning Radar
 
+![Dashboard overview](docs/dashboard.png)
+
 **An early-warning watchlist that tells a hospital pharmacy buyer which U.S. drugs are most likely to go into shortage in the next 6 months — built entirely from free, public FDA data.**
 
 A pharmacy buyer can't react to every drug, and the FDA usually posts a shortage only *after* supply is already tight — by then you're scrambling for an alternate. Shortages are also *rare* (~2 % of drug-months) and much of their causation — private contracts, raw-material supply, demand spikes — is invisible in public data, so a model that just maximises accuracy is useless here. Instead, this project ships a **ranked watchlist**: every month it surfaces the drugs most likely to go short, each with a calibrated risk score, a SHAP explanation of *why*, and — measured on a locked future test set — roughly **four months of lead time** to qualify a second supplier, raise par levels, or flag a drug for formulary review.
@@ -7,8 +9,6 @@ A pharmacy buyer can't react to every drug, and the FDA usually posts a shortage
 ### Who it's for
 **Primary user — the hospital / health-system pharmacy buyer**, whose recurring question every screen answers: *"Which drugs do I act on now, and can I trust it enough to reorder?"*
 *Who else this serves:* FDA / public-health analysts (where shortage risk is concentrating), wholesale & GPO planners (where to hold buffer stock or line up backup suppliers), and researchers — but it's designed first for the buyer.
-
-![Dashboard overview](docs/dashboard.png)
 
 ---
 
