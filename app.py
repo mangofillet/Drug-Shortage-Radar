@@ -35,7 +35,11 @@ def _load_data():
     data = {}
     for key, path in paths.items():
         if path.exists():
-            data[key] = F.shrink(pd.read_parquet(path))
+            cols = F.APP_FEATURE_COLS if key == "features" else None
+            d = F.shrink(pd.read_parquet(path, columns=cols))
+            if key == "features" and "split" in d.columns:  # dashboard never shows train-era rows
+                d = d[d["split"] != "train"]
+            data[key] = d
         else:
             data[key] = pd.DataFrame()
     return data
@@ -45,7 +49,8 @@ def _load_predictions(data: dict) -> pd.DataFrame:
     """Load or generate risk scores."""
     score_path = DATA_DIR / "predictions_val.parquet"
     if score_path.exists():
-        return F.shrink(pd.read_parquet(score_path))
+        df = F.shrink(pd.read_parquet(score_path))
+        return df[df["split"] != "train"] if "split" in df.columns else df
 
     features = data.get("features", pd.DataFrame())
     if features.empty or "risk_score" not in features.columns:
@@ -88,7 +93,7 @@ def _currently_short() -> set:
 CURRENTLY_SHORT = _currently_short()
 
 # Data for the analytical tabs (parquet reads only; figures built lazily per tab).
-FIGDATA = F.load_all()
+FIGDATA = F.load_all(light=True, features=FEAT, val=PREDS, shortages=SHORTAGES)
 
 
 def _graph(fig, **kw):

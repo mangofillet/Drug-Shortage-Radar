@@ -7,7 +7,9 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements-app.txt
-    startCommand: gunicorn app:server --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 120
+    startCommand: gunicorn app:server --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 120 --max-requests 200 --max-requests-jitter 30
     envVars:
       - key: PYTHON_VERSION
         value: "3.11.9"
+      - key: MALLOC_ARENA_MAX      # keep glibc from inflating RSS with per-thread arenas
+        value: "2"

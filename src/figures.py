@@ -80,36 +80,41 @@ def shrink(df):
     object columns so lexical max() on 'YYYY-MM' strings stays chronological."""
     if df is None or getattr(df, "empty", True):
         return df
-    n = len(df)
+    # Numeric-only downcast: value-preserving and safe. (Object->category was tried but
+    # broke groupby/replace/setitem paths downstream, so it's intentionally omitted.)
     for c in df.columns:
-        col = df[c]; k = col.dtype.kind
+        k = df[c].dtype.kind
         if k == "f":
-            df[c] = col.astype("float32")
+            df[c] = df[c].astype("float32")
         elif k in ("i", "u"):
-            df[c] = pd.to_numeric(col, downcast="integer")
-        elif k == "O":
-            if any(t in str(c).lower() for t in ("month", "date", "time", "day")):
-                continue
-            try:
-                if col.nunique(dropna=False) <= n // 2:
-                    df[c] = col.astype("category")
-            except TypeError:
-                pass
+            df[c] = pd.to_numeric(df[c], downcast="integer")
     return df
 
 
-def load_all() -> dict:
+# Columns the live dashboard actually reads (the other 26 feature cols are model inputs
+# used only during training — the app serves precomputed scores, not live inference).
+APP_FEATURE_COLS = ["drug_key", "month", "split", "y_6m", "next_onset_month",
+                    "past_shortage_count", "months_since_last_insp",
+                    "months_since_last_recall", "months_since_last_shortage"]
+APP_PANEL_COLS = ["drug_key", "month", "next_onset_month", "y_6m", "split"]
+
+
+def load_all(light: bool = False, features=None, val=None, shortages=None) -> dict:
+    """light=True reads only the columns the live dashboard uses. The app passes in already-
+    loaded frames (features/val/shortages) so the big files aren't read a second time — the
+    single biggest memory saving on a small host. Offline export calls with defaults."""
     d = {}
 
-    def _rd(name):
+    def _rd(name, cols=None):
         p = DATA_PROCESSED / name
-        return shrink(pd.read_parquet(p)) if p.exists() else pd.DataFrame()
+        return shrink(pd.read_parquet(p, columns=cols)) if p.exists() else pd.DataFrame()
 
-    d["shortages"] = _rd("shortages_raw.parquet")
-    d["panel"] = _rd("panel.parquet")
-    d["val"] = _rd("predictions_val.parquet")
+    d["shortages"] = shortages if shortages is not None else _rd("shortages_raw.parquet")
+    d["panel"] = _rd("panel.parquet", APP_PANEL_COLS if light else None)
+    d["val"] = val if val is not None else _rd("predictions_val.parquet")
     d["test"] = _rd("predictions_test.parquet")
-    d["features"] = _rd("features_with_labels.parquet")
+    d["features"] = features if features is not None else _rd(
+        "features_with_labels.parquet", APP_FEATURE_COLS if light else None)
     d["importance"] = _rd("models/feature_importance.parquet")
     if not d["val"].empty:
         d["val"] = d["val"][d["val"]["split"] == "val"]
@@ -347,23 +352,22 @@ def fig_feature_importance(importance: pd.DataFrame, n: int = 15) -> go.Figure:
                   xaxis_title="Total gain", margin=dict(l=220, r=24, t=54, b=48))
 
 
-def fig_shap_summary(features: pd.DataFrame, sample: int = 1500) -> go.Figure:
-    if features is None or features.empty:
-        return _empty("No feature data")
-    try:
-        from src.explain import compute_shap
-        val = features[features["split"] == "val"]
-        if len(val) > sample:
-            val = val.sample(sample, random_state=42)
-        shap_df = compute_shap(val)
-        mean_abs = (shap_df.groupby("feature")["shap_value"].apply(lambda s: s.abs().mean())
-                    .sort_values(ascending=True).tail(15))
-    except Exception as e:  # noqa: BLE001
-        return _empty(f"SHAP unavailable: {e}")
-    fig = go.Figure(go.Bar(x=mean_abs.values, y=mean_abs.index, orientation="h",
-                           marker_color=COLOR_ACCENT, hovertemplate="%{y}: %{x:.3f}<extra></extra>"))
-    return _style(fig, "Mean |SHAP| — drivers of predicted risk", height=460,
-                  xaxis_title="Mean |SHAP value|", margin=dict(l=220, r=24, t=54, b=48))
+def fig_shap_summary(features: pd.DataFrame = None, sample: int = 1500) -> go.Figure:
+    # Live SHAP needs the trained model + shap lib (excluded from the lightweight serving
+    # build), so serve the precomputed SHAP figure committed under reports/figures/.
+    import base64
+    p = Path(__file__).resolve().parent.parent / "reports" / "figures" / "perf_shap.png"
+    if not p.exists():
+        return _empty("SHAP summary (see reports/figures/perf_shap.png)")
+    b64 = base64.b64encode(p.read_bytes()).decode()
+    fig = go.Figure()
+    fig.add_layout_image(dict(source="data:image/png;base64," + b64, xref="paper", yref="paper",
+        x=0, y=1, sizex=1, sizey=1, xanchor="left", yanchor="top", sizing="contain", layer="below"))
+    fig.update_xaxes(visible=False, range=[0, 1])
+    fig.update_yaxes(visible=False, range=[0, 1])
+    fig.update_layout(height=460, margin=dict(l=0, r=0, t=40, b=0),
+                      title="Mean |SHAP| — drivers of predicted risk")
+    return fig
 
 
 def fig_val_test_metrics(val: pd.DataFrame, test: pd.DataFrame) -> go.Figure:
