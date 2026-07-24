@@ -190,6 +190,7 @@ def _drug_key_to_label(dk: str, max_len: int = 56) -> str:
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP],
            suppress_callback_exceptions=True, title="Drug Shortage Radar")
+server = app.server  # WSGI entrypoint for gunicorn (e.g. `gunicorn app:server` on Render)
 
 # Dossier / report aesthetic — warm paper, white sheet, serif headings, one ink + one
 # terracotta accent. No decorative imagery; figures are the only graphics.

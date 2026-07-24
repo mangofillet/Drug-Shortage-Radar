@@ -1,5 +1,5 @@
 data/raw/
-data/processed/
+# data/processed/ IS committed — the deployed dashboard serves these precomputed parquet caches.
 *.pyc
 __pycache__/
 .env
@@ -7,3 +7,5 @@ __pycache__/
 dist/
 .pytest_cache/
 .DS_Store
+.venv/
+.venv-render/

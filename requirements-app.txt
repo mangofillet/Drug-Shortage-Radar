@@ -1,0 +1,11 @@
+# Runtime-only deps to SERVE the dashboard on Render.
+# The dashboard reads precomputed parquet caches (data/processed/) — no training/ML libs
+# (lightgbm, shap, sentence-transformers/torch) are needed at serve time.
+pandas>=2.0,<3
+numpy>=1.24,<2.2
+scikit-learn>=1.3,<1.7
+plotly>=5.18,<7
+dash>=2.16,<3
+dash-bootstrap-components>=1.5,<2
+pyarrow>=14
+gunicorn>=21

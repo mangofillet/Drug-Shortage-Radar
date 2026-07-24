@@ -1,0 +1,13 @@
+# Render Blueprint — deploy the dashboard as a free web service.
+# In Render: New > Blueprint > pick this repo. (Or a plain Web Service with the
+# build/start commands below.) The app serves precomputed parquet from data/processed/.
+services:
+  - type: web
+    name: drug-shortage-radar
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements-app.txt
+    startCommand: gunicorn app:server --workers 1 --threads 2 --timeout 120 --preload
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
