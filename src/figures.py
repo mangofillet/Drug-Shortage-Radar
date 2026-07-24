@@ -74,12 +74,36 @@ def _empty(msg: str) -> go.Figure:
 
 
 # ── Data loading (used by app + export script) ─────────────────────────────────
+def shrink(df):
+    """Downcast in place to cut memory ~3x (value-preserving): float64->float32,
+    ints downcast, low-cardinality object cols -> category. Skips month/date-like
+    object columns so lexical max() on 'YYYY-MM' strings stays chronological."""
+    if df is None or getattr(df, "empty", True):
+        return df
+    n = len(df)
+    for c in df.columns:
+        col = df[c]; k = col.dtype.kind
+        if k == "f":
+            df[c] = col.astype("float32")
+        elif k in ("i", "u"):
+            df[c] = pd.to_numeric(col, downcast="integer")
+        elif k == "O":
+            if any(t in str(c).lower() for t in ("month", "date", "time", "day")):
+                continue
+            try:
+                if col.nunique(dropna=False) <= n // 2:
+                    df[c] = col.astype("category")
+            except TypeError:
+                pass
+    return df
+
+
 def load_all() -> dict:
     d = {}
 
     def _rd(name):
         p = DATA_PROCESSED / name
-        return pd.read_parquet(p) if p.exists() else pd.DataFrame()
+        return shrink(pd.read_parquet(p)) if p.exists() else pd.DataFrame()
 
     d["shortages"] = _rd("shortages_raw.parquet")
     d["panel"] = _rd("panel.parquet")

@@ -35,7 +35,7 @@ def _load_data():
     data = {}
     for key, path in paths.items():
         if path.exists():
-            data[key] = pd.read_parquet(path)
+            data[key] = F.shrink(pd.read_parquet(path))
         else:
             data[key] = pd.DataFrame()
     return data
@@ -45,7 +45,7 @@ def _load_predictions(data: dict) -> pd.DataFrame:
     """Load or generate risk scores."""
     score_path = DATA_DIR / "predictions_val.parquet"
     if score_path.exists():
-        return pd.read_parquet(score_path)
+        return F.shrink(pd.read_parquet(score_path))
 
     features = data.get("features", pd.DataFrame())
     if features.empty or "risk_score" not in features.columns:
